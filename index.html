@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro e Inicio de Sesión</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #fce4ec, #f8bbd0);
+            color: #4a148c;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 30px;
+            color: #880e4f;
+        }
+
+        form {
+            background-color: #ffffffcc;
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #f8bbd0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #ec407a;
+            color: white;
+            padding: 12px;
+            border: none;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #d81b60;
+        }
+
+        #mensaje {
+            max-width: 400px;
+            margin: 10px auto;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .exito {
+            background-color: #e1f5fe;
+            color: #0277bd;
+            border: 1px solid #81d4fa;
+        }
+
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+    </style>
+</head>
+<body>
+    <h1>💗 Registro de Estudiante</h1>
+    <form id="formRegistro">
+        <label for="identificacion">Identificación</label>
+        <input type="text" id="identificacion" name="identificacion" required>
+
+        <label for="nombre">Nombre y Apellidos</label>
+        <input type="text" id="nombre" name="nombre" required>
+
+        <label for="correo">Correo Electrónico</label>
+        <input type="email" id="correo" name="correo" required>
+
+        <label for="telefono">Número Telefónico</label>
+        <input type="text" id="telefono" name="telefono" required>
+
+        <label for="contrasena">Contraseña</label>
+        <input type="password" id="contrasena" name="contrasena" required>
+
+        <button type="submit">Registrar Estudiante</button>
+    </form>
+
+    <h1>🌸 Iniciar Sesión</h1>
+    <form id="formLogin">
+        <label for="identificacionLogin">Identificación</label>
+        <input type="text" id="identificacionLogin" name="identificacion" required>
+
+        <label for="contrasenaLogin">Contraseña</label>
+        <input type="password" id="contrasenaLogin" name="contrasena" required>
+
+        <button type="submit">Iniciar Sesión</button>
+    </form>
+
+    <div id="mensaje"></div>
+
+    <script>
+        function mostrarMensaje(mensaje, esExito) {
+            const mensajeDiv = document.getElementById('mensaje');
+            mensajeDiv.textContent = mensaje;
+            mensajeDiv.className = esExito ? 'exito' : 'error';
+            mensajeDiv.style.display = 'block';
+
+            setTimeout(() => {
+                mensajeDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        document.getElementById('formRegistro').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const data = {};
+            formData.forEach((value, key) => data[key] = value);
+
+            fetch('/registrarEstudiante', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.text())
+            .then(mensaje => mostrarMensaje(mensaje, true))
+            .catch(error => {
+                mostrarMensaje('Error al registrar el estudiante', false);
+                console.error('Error:', error);
+            });
+        });
+
+        document.getElementById('formLogin').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const data = {};
+            formData.forEach((value, key) => data[key] = value);
+
+            fetch('/iniciarSesion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    return response.text();
+                }
+            })
+            .then(mensaje => {
+                if (mensaje) mostrarMensaje(mensaje, false);
+            })
+            .catch(error => {
+                mostrarMensaje('Error al iniciar sesión', false);
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
